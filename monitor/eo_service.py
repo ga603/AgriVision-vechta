@@ -1,4 +1,6 @@
+import os
 import numpy as np
+from dotenv import load_dotenv
 from sentinelhub import (
     SHConfig, 
     SentinelHubRequest, 
@@ -9,11 +11,15 @@ from sentinelhub import (
     MimeType
 )
 
+# Load the hidden variables from your .env file
+load_dotenv()
+
 def get_sentinel_config():
     config = SHConfig()
-    # Paste your active CDSE Client ID and Secret here
-    config.sh_client_id = 'sh-5c97b453-a8b1-4ec8-8857-4ea38ccea70a'
-    config.sh_client_secret = 'fqTLwRo9etdRYsUNa4ij0TvUzXTnDzKN'
+    
+    # Securely fetch keys from the environment
+    config.sh_client_id = os.getenv('CDSE_CLIENT_ID') 
+    config.sh_client_secret = os.getenv('CDSE_CLIENT_SECRET')
     
     config.sh_token_url = 'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token'
     config.sh_base_url = 'https://sh.dataspace.copernicus.eu'

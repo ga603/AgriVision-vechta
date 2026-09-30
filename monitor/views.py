@@ -25,16 +25,27 @@ def dashboard(request):
     return render(request, 'monitor/dashboard.html', context)
 
 def analyze_field(request, field_id):
-    """
-    Triggered by the frontend to analyze a specific field.
-    """
     field = get_object_or_404(AgriculturalField, id=field_id)
+
+    # Build the Sentinel Hub bounding box from the field boundary.
+    boundary = field.boundary_coordinates
+    if isinstance(boundary, dict):
+        boundary = boundary.get('coordinates', boundary)
+    if boundary and isinstance(boundary[0][0], (list, tuple)):
+        boundary = boundary[0]
+    lons = [point[0] for point in boundary]
+    lats = [point[1] for point in boundary]
+
+    # Format required by Sentinel Hub: (min_lon, min_lat, max_lon, max_lat)
+    bbox_coords = (min(lons), min(lats), max(lons), max(lats))
     
-    # For this prototype, we will hardcode a bounding box around Vechta.
-    bbox_coords = (8.2700, 52.7200, 8.2900, 52.7400) 
-    time_interval = ('2026-08-28', '2026-09-28') 
+    # NEW: Read dates from the frontend request, with fallbacks
+    start_date = request.GET.get('start_date', '2026-08-28')
+    end_date = request.GET.get('end_date', '2026-09-28')
+    time_interval = (start_date, end_date) 
     
     try:
+        # Fetch satellite data using dynamic bounds.
         # 1. Fetch satellite data
         satellite_data = fetch_multispectral_data(bbox_coords, time_interval)
         latest_scan = satellite_data[0] 
@@ -85,3 +96,27 @@ def analyze_field(request, field_id):
         
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+def add_field(request):
+    """
+    Receives GeoJSON data from Leaflet.draw and saves it to the database.
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            farm_name = data.get('name')
+            crop = data.get('crop_type')
+            boundary = data.get('boundary_coordinates')
+            
+            # Create the new field in the SQLite database
+            new_field = AgriculturalField.objects.create(
+                name=farm_name,
+                crop_type=crop,
+                boundary_coordinates={'type': 'Polygon', 'coordinates': boundary['coordinates']}
+            )
+            
+            return JsonResponse({'status': 'success', 'field_id': new_field.id})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
