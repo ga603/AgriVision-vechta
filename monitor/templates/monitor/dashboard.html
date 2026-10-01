@@ -129,8 +129,9 @@
 
     // 2. Initialize Map (Fixed Syntax)
     var map = L.map('map').setView([52.7278, 8.2831], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-    var anomalyLayer = L.layerGroup().addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+}).addTo(map);
 
     // 3. Ask for user's GPS location and zoom there
     map.locate({setView: true, maxZoom: 15});
