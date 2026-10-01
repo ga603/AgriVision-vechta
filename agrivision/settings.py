@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-c6kp=gk(qy8s25dw(j8c)1jo6g2h_hs5a)uz@ai1sn5&#__%ys
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['agrivision-vechta.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
