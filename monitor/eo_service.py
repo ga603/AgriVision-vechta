@@ -34,7 +34,7 @@ def fetch_multispectral_data(bbox_coords, time_interval):
     """
     config = get_sentinel_config()
     field_bbox = BBox(bbox=bbox_coords, crs=CRS.WGS84)
-    size = bbox_to_dimensions(field_bbox, resolution=10)
+    size = bbox_to_dimensions(field_bbox, resolution=60)
 
     evalscript = """
     //VERSION=3
