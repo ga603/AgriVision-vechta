@@ -11,16 +11,18 @@ from sentinelhub import (
     MimeType
 )
 
-# Load the hidden variables from your .env file
+# Load the hidden variables from your .env file (for local development)
 load_dotenv()
 
 def get_sentinel_config():
     config = SHConfig()
     
-    # Securely fetch keys from the environment
-    config.sh_client_id = os.getenv('CDSE_CLIENT_ID') 
-    config.sh_client_secret = os.getenv('CDSE_CLIENT_SECRET')
+    # Securely fetch keys from the environment with a fallback for Render
+    config.sh_client_id = os.environ.get('SH_CLIENT_ID') or os.environ.get('CDSE_CLIENT_ID')
+    config.sh_client_secret = os.environ.get('SH_CLIENT_SECRET') or os.environ.get('CDSE_CLIENT_SECRET')
     
+    # Force the library to use the European Copernicus Data Space (CDSE) 
+    # instead of the legacy American Sentinel Hub servers.
     config.sh_token_url = 'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token'
     config.sh_base_url = 'https://sh.dataspace.copernicus.eu'
     return config
@@ -57,7 +59,6 @@ def fetch_multispectral_data(bbox_coords, time_interval):
         service_url="https://sh.dataspace.copernicus.eu"
     )
     
-
     request = SentinelHubRequest(
         evalscript=evalscript,
         input_data=[
